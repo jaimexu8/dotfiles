@@ -14,16 +14,16 @@ Configuration files for Arch Linux, macOS, and data.cs.purdue.edu
 
 ## Installation
 
-1. Clone the repository
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/jaimexu8/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 ```
 
-2. Backup existing configs
+### 2. Backup existing configs
 
-### Example backups
+#### Example backups
 
 ```bash
 mv ~/.config/nvim ~/.config/nvim.bak
@@ -33,24 +33,24 @@ mv ~/.config/fish ~/.config/fish.bak
 mv ~/.zshrc ~/.zshrc.bak
 ```
 
-3. Install
+### 3. Install
 
-### Arch Linux (Fish)
+#### Arch Linux (Fish)
 
 ```bash
 stow git nvim vim caelestia fish
 ```
 
-### macOS (Zsh)
+#### macOS (Zsh)
 
 ```bash
 stow git nvim vim zsh
 ```
 
-### data.cs.purdue.edu
+#### data.cs.purdue.edu
 
 ```bash
-# Link vim
+# Link Vim
 ln -s ~/dotfiles/vim/.vimrc ~/.vimrc
 
 # Link Neovim
@@ -60,4 +60,3 @@ ln -s ~/dotfiles/nvim/.config/nvim ~/.config/nvim
 # Source Bash config
 echo "source ~/dotfiles/bash/.bashrc" >> ~/.bashrc
 ```
-
