@@ -4,13 +4,13 @@ Configuration files for Arch Linux, macOS, and data.cs.purdue.edu
 
 ## Structure
 
-~/dotfiles/
-├── git/              \# Global Git config \& ignore files
-├── nvim/             \# Neovim (init.lua + lazy-lock.json)
-├── vim/              \# Vim config (.vimrc)
-├── fish/             \# Fish config (Arch Linux)
-├── zsh/              \# Zsh config (macOS)
-└── bash/             \# Bash config (data.cs.purdue.edu)
+- **git/** - Global Git config & ignore files
+- **nvim/** - Neovim (init.lua + lazy-lock.json)
+- **vim/** - Vim config (.vimrc)
+- **caelestia/** - Caelestia shell config
+- **fish/** - Fish config (Arch Linux)
+- **zsh/** - Zsh config (macOS)
+- **bash/** - Bash config (data.cs.purdue.edu)
 
 ## Installation
 
@@ -38,7 +38,7 @@ mv ~/.zshrc ~/.zshrc.bak
 ### Arch Linux (Fish)
 
 ```bash
-stow git nvim vim fish
+stow git nvim vim caelestia fish
 ```
 
 ### macOS (Zsh)
