@@ -1,0 +1,54 @@
+[user]
+	email = jaimexu8@gmail.com
+	name = jaime
+
+# ==========================================
+# CORE BEHAVIOR
+# ==========================================
+[core]
+    # Use Neovim for commit messages, etc.
+	editor = nvim
+    # For new repos, name the default branch "main" instead of "master"
+	defaultBranch = main
+    # Prevents line ending issues between Mac/Linux and Windows
+    autocrlf = input
+    # Point to a global ignore file
+    excludesfile = ~/.gitignore_global
+
+[init]
+    defaultBranch = main
+
+# ==========================================
+# ALIASES
+# ==========================================
+[alias]
+  # Basic shortcuts
+	s = status
+	co = checkout
+	ci = commit
+	br = branch
+	unstage = reset HEAD --
+  # Pretty log format
+	lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+
+# ==========================================
+# PUSH & PULL BEHAVIOR
+# ==========================================
+[pull]
+    rebase = true 
+[push]
+    autoSetupRemote = true
+
+# ==========================================
+# UI & COLOR
+# ==========================================
+[color]
+	ui = auto
+
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+
