@@ -1,6 +1,6 @@
 # My Dotfiles
 
-Configuration files for Arch Linux, macOS, and data.cs.purdue.edu
+Configuration files for Amazon Linux (EC2), Arch Linux, macOs, and data.cs.purdue.edu.
 
 ## Structure
 
@@ -9,8 +9,7 @@ Configuration files for Arch Linux, macOS, and data.cs.purdue.edu
 - **vim/** - Vim config (.vimrc)
 - **caelestia/** - Caelestia shell config
 - **fish/** - Fish config (Arch Linux)
-- **zsh/** - Zsh config (macOS)
-- **bash/** - Bash config (data.cs.purdue.edu)
+- **zsh/** - Zsh config (Amazon Linux, macOs, data.cs.purdue.edu)
 
 ## Installation
 
@@ -23,8 +22,6 @@ cd ~/dotfiles
 
 ### 2. Backup existing configs
 
-#### Example backups
-
 ```bash
 mv ~/.config/nvim ~/.config/nvim.bak
 mv ~/.vimrc ~/.vimrc.bak
@@ -34,6 +31,42 @@ mv ~/.zshrc ~/.zshrc.bak
 ```
 
 ### 3. Install
+
+#### Amazon Linux 2023 (EC2)
+
+Amazon Linux 2023 requires manual package installation for Neovim (built from release), Zsh, and Ripgrep (via SPAL repository).
+
+**1. Install Core Dependencies & SPAL Repo**
+```bash
+sudo dnf update -y
+sudo dnf install -y git zsh vim util-linux-user spal-release
+sudo dnf makecache
+sudo dnf install -y ripgrep
+```
+
+**2. Install Neovim**
+```bash
+curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
+sudo ln -sf /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/nvim
+rm nvim-linux-x86_64.tar.gz
+```
+
+**3. Link Configs (Manual Symlinks)**
+```bash
+mkdir -p ~/.config
+ln -sf ~/dotfiles/git/.gitconfig ~/.gitconfig
+ln -sf ~/dotfiles/git/.gitignore_global ~/.gitignore_global
+ln -sf ~/dotfiles/vim/.vimrc ~/.vimrc
+ln -sf ~/dotfiles/zsh/.zshrc ~/.zshrc
+ln -sf ~/dotfiles/nvim/.config/nvim ~/.config/nvim
+```
+
+**4. Set Zsh as Default Shell**
+```bash
+sudo chsh -s $(which zsh) ec2-user
+```
+*(Log out and back in to apply the shell change, then launch `nvim` to let lazy.nvim install plugins).*
 
 #### Arch Linux (Fish)
 
@@ -47,16 +80,12 @@ stow git nvim vim caelestia fish
 stow git nvim vim zsh
 ```
 
-#### data.cs.purdue.edu
+#### data.cs.purdue.edu (Bash)
 
 ```bash
-# Link Vim
 ln -s ~/dotfiles/vim/.vimrc ~/.vimrc
-
-# Link Neovim
 mkdir -p ~/.config
 ln -s ~/dotfiles/nvim/.config/nvim ~/.config/nvim
-
-# Source Bash config
-echo "source ~/dotfiles/bash/.bashrc" >> ~/.bashrc
+echo "source ~/dotfiles/zsh/.zshrc" >> ~/.zshrc
 ```
+
