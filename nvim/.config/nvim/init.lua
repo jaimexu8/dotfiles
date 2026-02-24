@@ -44,7 +44,7 @@ require("lazy").setup({
       })
     end
   }
-})
+}, { rocks = { enabled = false } })
 
 -- ==========================================
 -- 3. SETTINGS
@@ -54,6 +54,8 @@ vim.opt.cursorline = true -- Highlight current line
 vim.opt.scrolloff = 10    -- Keep 10 lines context
 vim.opt.visualbell = true -- Flash instead of beep
 vim.opt.mouse = "a"       -- Enable mouse
+vim.g.loaded_ruby_provider = 0
+vim.g.loaded_perl_provider = 0
 
 -- Indentation
 vim.opt.shiftwidth = 2
