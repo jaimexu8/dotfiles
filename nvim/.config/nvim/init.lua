@@ -1,6 +1,3 @@
--- ==========================================
--- 1. BOOTSTRAP LAZY.NVIM
--- ==========================================
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
@@ -10,9 +7,6 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- ==========================================
--- 2. PLUGINS
--- ==========================================
 require("lazy").setup({
   -- Theme: Tokyonight
   {
@@ -46,9 +40,6 @@ require("lazy").setup({
   }
 }, { rocks = { enabled = false } })
 
--- ==========================================
--- 3. SETTINGS
--- ==========================================
 vim.opt.number = true     -- Show line numbers
 vim.opt.cursorline = true -- Highlight current line
 vim.opt.scrolloff = 10    -- Keep 10 lines context
@@ -70,9 +61,6 @@ vim.opt.smartcase = true          -- ...unless uppercase is used
 vim.opt.updatetime = 250          -- Faster completion
 vim.opt.clipboard = "unnamedplus" -- Sync with system clipboard
 
--- ==========================================
--- 4. CLIPBOARD & OS HANDLING
--- ==========================================
 local uname = vim.loop.os_uname().sysname
 
 if uname == "Darwin" then
@@ -91,7 +79,7 @@ elseif uname == "Linux" then
       paste = { ["+"] = "wl-paste", ["*"] = "wl-paste" },
     }
   -- Remote Server via SSH
-  elseif os.getenv("SSH_TTY") then
+  elseif os.getenv("SSH_TTY") or os.getenv("SSH_CONNECTION") then
     vim.g.clipboard = {
       name = 'OSC 52',
       copy = {
@@ -103,12 +91,15 @@ elseif uname == "Linux" then
         ['*'] = require('vim.ui.clipboard.osc52').paste('*'),
       },
     }
+  else
+    vim.g.clipboard = {
+      name = "wl-clipboard",
+      copy = { ["+"] = "wl-copy", ["*"] = "wl-copy" },
+      paste = { ["+"] = "wl-paste", ["*"] = "wl-paste" },
+    }
   end
 end
 
--- ==========================================
--- 5. MAPPINGS
--- ==========================================
 vim.keymap.set("v", "<C-c>", '"+y')         -- Copy
 vim.keymap.set("n", "<C-v>", '"+p')         -- Paste normal mode
 vim.keymap.set("i", "<C-v>", '<C-r><C-o>+') -- Paste insert mode

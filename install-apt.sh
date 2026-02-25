@@ -20,8 +20,9 @@ export DEBIAN_FRONTEND=noninteractive
 curl -fsSL https://deb.nodesource.com/setup_lts.x | $SUDO bash -
 
 $SUDO apt update
-$SUDO apt install -y git zsh vim stow ripgrep curl tar ca-certificates build-essential xclip nodejs python3 python3-pip python3-venv
+$SUDO apt install -y git zsh vim stow ripgrep curl tar ca-certificates build-essential wl-clipboard nodejs python3 python3-pip python3-venv
 
+$SUDO npm install -g neovim tree-sitter-cli
 python3 -m pip install --user --break-system-packages pynvim 2>/dev/null || python3 -m pip install --user pynvim
 
 curl -LO "https://github.com/neovim/neovim/releases/latest/download/${NVIM_RELEASE}.tar.gz"

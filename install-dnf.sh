@@ -19,8 +19,9 @@ $SUDO dnf update -y
 $SUDO dnf install -y spal-release
 $SUDO dnf makecache
 $SUDO dnf groupinstall -y "Development Tools"
-$SUDO dnf install -y git zsh vim util-linux-user stow ripgrep curl tar gzip xclip nodejs python3 python3-pip
+$SUDO dnf install -y git zsh vim util-linux-user stow ripgrep curl tar gzip wl-clipboard nodejs python3 python3-pip
 
+$SUDO npm install -g neovim tree-sitter-cli
 python3 -m pip install --user pynvim
 
 curl -LO "https://github.com/neovim/neovim/releases/latest/download/${NVIM_RELEASE}.tar.gz"
