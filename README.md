@@ -14,12 +14,12 @@
 ### Ubuntu
 
 ```bash
-curl -sL https://raw.githubusercontent.com/jaimexu8/dotfiles/main/install-apt.sh | bash
+bash -c "$(curl -sL https://raw.githubusercontent.com/jaimexu8/dotfiles/main/install-apt.sh)"
 ```
 
 ### Amazon Linux (2023)
 
 ```bash
-curl -sL https://raw.githubusercontent.com/jaimexu8/dotfiles/main/install-dnf.sh | bash
+bash -c "$(curl -sL https://raw.githubusercontent.com/jaimexu8/dotfiles/main/install-dnf.sh)"
 ```
 
