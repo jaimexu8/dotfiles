@@ -59,9 +59,10 @@ yank() {
 # COMMAND HISTORY
 # ==========================================
 HISTFILE="$HOME/.zsh_history"
-HISTSIZE=10000
+HISTSIZE=12000
 SAVEHIST=10000
-setopt APPEND_HISTORY          # Append to history rather than overwrite
+setopt EXTENDED_HISTORY        # Write timestamps
+setopt INC_APPEND_HISTORY      # Append immediately
 setopt HIST_IGNORE_ALL_DUPS    # Don't save duplicated commands to history
 setopt HIST_REDUCE_BLANKS      # Remove extra blank spaces from history
 setopt SHARE_HISTORY           # Share history across all open terminal windows
