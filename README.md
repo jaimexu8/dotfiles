@@ -3,7 +3,6 @@
 ## Structure
 
 - caelestia/ - Caelestia shell config
-- fish/ - Fish config
 - git/ - Global Git config & ignore files
 - nvim/ - Neovim (init.lua + lazy-lock.json)
 - vim/ - Vim config (.vimrc)
