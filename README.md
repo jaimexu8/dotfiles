@@ -48,6 +48,7 @@ Leader Key: **`Ctrl + A`** (1-second timeout. Press `Ctrl + A` twice to pass `Ct
 
 | Shortcut | Action |
 | :--- | :--- |
+| `Leader` + `?` / `F1` / `Ctrl+Shift+?` | **Open Keybindings Cheatsheet Popup** (fuzzy searchable modal) |
 | `Leader` + `Space` | Open Launcher menu (switch shells, WSL distros) |
 | `Ctrl + Shift + P` / `Cmd + P` | Command Palette |
 | `Alt + Enter` | Toggle Fullscreen |

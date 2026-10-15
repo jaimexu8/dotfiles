@@ -33,7 +33,7 @@ end)()
 config.color_scheme = "rose-pine-moon"
 
 -- Background opacity and platform-specific blur
-config.window_background_opacity = 0.85
+config.window_background_opacity = 0.88
 
 if is_mac then
   -- macOS native frosted-glass blur
@@ -43,12 +43,34 @@ elseif is_windows then
   config.win32_system_backdrop = "Acrylic" -- Options: "Mica", "Acrylic", "Tabbed"
 end
 
--- Padding around terminal content
+-- Subtle dimming and desaturation for inactive panes (focus enhancement)
+config.inactive_pane_hsb = {
+  saturation = 0.7,
+  brightness = 0.6,
+}
+
+-- Theme-matched colors for splits and tab bar
+config.colors = {
+  split = "#393552", -- Muted border matching Rosé Pine Moon
+  tab_bar = {
+    background = "rgba(0, 0, 0, 0)", -- Transparent tab bar background
+    new_tab = {
+      bg_color = "rgba(0, 0, 0, 0)",
+      fg_color = "#6e6a86",
+    },
+    new_tab_hover = {
+      bg_color = "#2a273f",
+      fg_color = "#e0def4",
+    },
+  },
+}
+
+-- Padding around terminal content (breathing room)
 config.window_padding = {
-  left = 12,
-  right = 12,
-  top = 10,
-  bottom = 8,
+  left = 16,
+  right = 16,
+  top = 12,
+  bottom = 10,
 }
 
 -- Window decorations:
@@ -83,56 +105,138 @@ else
   config.font_size = 12.5
 end
 
-config.line_height = 1.1
+config.line_height = 1.15
 
 --------------------------------------------------------------------------------
--- 4. TAB BAR CONFIGURATION
+-- 4. TAB BAR CONFIGURATION & AESTHETICS
 --------------------------------------------------------------------------------
 config.use_fancy_tab_bar = false
 config.hide_tab_bar_if_only_one_tab = true
-config.tab_max_width = 32
+config.tab_max_width = 36
 config.tab_bar_at_bottom = false
 
--- Format tab title cleanly
+-- Helper: Map process name to a clean Nerd Font icon
+local function get_process_icon(process_name)
+  local name = (process_name or ""):lower():gsub("%.exe$", "")
+  if name:find("nvim") or name:find("vim") then
+    return ""
+  elseif name:find("zsh") or name:find("bash") or name:find("fish") or name:find("sh") then
+    return ""
+  elseif name:find("git") then
+    return ""
+  elseif name:find("python") or name:find("py") then
+    return ""
+  elseif name:find("node") or name:find("npm") or name:find("pnpm") or name:find("yarn") then
+    return ""
+  elseif name:find("cargo") or name:find("rust") then
+    return ""
+  elseif name:find("pwsh") or name:find("powershell") then
+    return "󰨊"
+  elseif name:find("cmd") then
+    return ""
+  elseif name:find("docker") then
+    return "󰡨"
+  else
+    return ""
+  end
+end
+
+-- Helper: Safely retrieve current working directory basename
+local function get_cwd_basename(pane)
+  local success, cwd_uri = pcall(function() return pane.current_working_path end)
+  if success and cwd_uri then
+    local path = tostring(cwd_uri.file_path or cwd_uri)
+    local home = os.getenv("HOME") or ""
+    if home ~= "" and path:sub(1, #home) == home then
+      path = "~" .. path:sub(#home + 1)
+    end
+    local basename = path:match("([^/\\]+)[/\\]*$") or path
+    return basename
+  end
+  return ""
+end
+
+-- Format tab title as modern floating pill
 wezterm.on("format-tab-title", function(tab, tabs, panes, config, hover, max_width)
   local pane = tab.active_pane
   local title = pane.title
 
-  -- Extract clean process / directory name
-  local process_name = pane.foreground_process_name or ""
-  if process_name ~= "" then
-    -- Strip directory path and file extension (e.g. C:\...\pwsh.exe -> pwsh)
-    local clean_name = process_name:gsub("(.*[/\\])(.*)", "%2"):gsub("%.exe$", "")
-    if clean_name ~= "" then
-      title = clean_name
-    end
+  -- Extract clean process name & icon
+  local raw_process = pane.foreground_process_name or ""
+  local clean_name = raw_process:gsub("(.*[/\\])(.*)", "%2"):gsub("%.exe$", "")
+  local icon = get_process_icon(clean_name ~= "" and clean_name or title)
+
+  if clean_name ~= "" then
+    title = clean_name
   end
 
   local index = tab.tab_index + 1
-  local prefix = " " .. index .. ": "
-  local suffix = " "
-  if tab.is_active then
-    prefix = "  " .. index .. ": "
-  end
 
-  return {
-    { Text = prefix .. title .. suffix },
-  }
+  -- Active tab: vibrant pill with rounded caps ( ... )
+  if tab.is_active then
+    return {
+      { Background = { Color = "rgba(0, 0, 0, 0)" } },
+      { Foreground = { Color = "#ea9a97" } },
+      { Text = " " },
+      { Background = { Color = "#ea9a97" } },
+      { Foreground = { Color = "#232136" } },
+      { Attribute = { Intensity = "Bold" } },
+      { Text = icon .. " " .. index .. ": " .. title },
+      { Background = { Color = "rgba(0, 0, 0, 0)" } },
+      { Foreground = { Color = "#ea9a97" } },
+      { Text = " " },
+    }
+  else
+    -- Inactive tab: subtle dark pill
+    local bg = hover and "#393552" or "#2a273f"
+    local fg = hover and "#e0def4" or "#908caa"
+    return {
+      { Background = { Color = "rgba(0, 0, 0, 0)" } },
+      { Foreground = { Color = bg } },
+      { Text = " " },
+      { Background = { Color = bg } },
+      { Foreground = { Color = fg } },
+      { Text = icon .. " " .. index .. ": " .. title },
+      { Background = { Color = "rgba(0, 0, 0, 0)" } },
+      { Foreground = { Color = bg } },
+      { Text = " " },
+    }
+  end
 end)
 
--- Status bar formatting with OS icon and Leader key indicator
+-- Status bar formatting with rounded pills for Leader, CWD, OS, and Clock
 wezterm.on("update-status", function(window, pane)
   local stat = {}
 
-  -- Leader key indicator
+  -- 1. Leader Pill (Pops up in vibrant Rose when active)
   if window:leader_is_active() then
+    table.insert(stat, { Background = { Color = "rgba(0, 0, 0, 0)" } })
+    table.insert(stat, { Foreground = { Color = "#eb6f92" } })
+    table.insert(stat, { Text = "" })
     table.insert(stat, { Background = { Color = "#eb6f92" } })
     table.insert(stat, { Foreground = { Color = "#232136" } })
     table.insert(stat, { Attribute = { Intensity = "Bold" } })
-    table.insert(stat, { Text = "  LEADER  " })
+    table.insert(stat, { Text = "󰌌 LEADER" })
+    table.insert(stat, { Background = { Color = "rgba(0, 0, 0, 0)" } })
+    table.insert(stat, { Foreground = { Color = "#eb6f92" } })
+    table.insert(stat, { Text = "  " })
   end
 
-  -- OS Badge
+  -- 2. Current Working Directory Pill
+  local cwd = get_cwd_basename(pane)
+  if cwd ~= "" then
+    table.insert(stat, { Background = { Color = "rgba(0, 0, 0, 0)" } })
+    table.insert(stat, { Foreground = { Color = "#2a273f" } })
+    table.insert(stat, { Text = "" })
+    table.insert(stat, { Background = { Color = "#2a273f" } })
+    table.insert(stat, { Foreground = { Color = "#9ccfd8" } })
+    table.insert(stat, { Text = " " .. cwd })
+    table.insert(stat, { Background = { Color = "rgba(0, 0, 0, 0)" } })
+    table.insert(stat, { Foreground = { Color = "#2a273f" } })
+    table.insert(stat, { Text = " " })
+  end
+
+  -- 3. OS Pill
   local os_badge = " Linux"
   if is_windows then
     os_badge = " Windows"
@@ -142,15 +246,27 @@ wezterm.on("update-status", function(window, pane)
     os_badge = " macOS"
   end
 
-  table.insert(stat, { Background = { Color = "#2a283e" } })
-  table.insert(stat, { Foreground = { Color = "#9ccfd8" } })
-  table.insert(stat, { Text = " " .. os_badge .. " " })
-
-  -- Current time
-  local time = wezterm.strftime(" %H:%M ")
+  table.insert(stat, { Background = { Color = "rgba(0, 0, 0, 0)" } })
+  table.insert(stat, { Foreground = { Color = "#393552" } })
+  table.insert(stat, { Text = "" })
   table.insert(stat, { Background = { Color = "#393552" } })
+  table.insert(stat, { Foreground = { Color = "#c4a7e7" } })
+  table.insert(stat, { Text = os_badge })
+  table.insert(stat, { Background = { Color = "rgba(0, 0, 0, 0)" } })
+  table.insert(stat, { Foreground = { Color = "#393552" } })
+  table.insert(stat, { Text = " " })
+
+  -- 4. Clock Pill
+  local time = wezterm.strftime(" %H:%M")
+  table.insert(stat, { Background = { Color = "rgba(0, 0, 0, 0)" } })
+  table.insert(stat, { Foreground = { Color = "#2a273f" } })
+  table.insert(stat, { Text = "" })
+  table.insert(stat, { Background = { Color = "#2a273f" } })
   table.insert(stat, { Foreground = { Color = "#e0def4" } })
   table.insert(stat, { Text = time })
+  table.insert(stat, { Background = { Color = "rgba(0, 0, 0, 0)" } })
+  table.insert(stat, { Foreground = { Color = "#2a273f" } })
+  table.insert(stat, { Text = " " })
 
   window:set_right_status(wezterm.format(stat))
 end)
@@ -224,18 +340,23 @@ elseif is_linux then
 end
 
 --------------------------------------------------------------------------------
--- 6. GENERAL SETTINGS & PERFORMANCE
+-- 6. GENERAL SETTINGS, CURSOR & ANIMATION
 --------------------------------------------------------------------------------
 -- Prefer hardware-accelerated WebGpu; auto-falls back to OpenGL / Software
 config.front_end = "WebGpu"
+
+-- High refresh rate smooth rendering
+config.animation_fps = 60
 
 config.scrollback_lines = 10000
 config.audible_bell = "Disabled"
 config.check_for_updates = false
 
--- Cursor styling
+-- Smooth cursor styling
 config.default_cursor_style = "BlinkingBar"
-config.cursor_blink_rate = 650
+config.cursor_blink_rate = 600
+config.cursor_blink_ease_in = "EaseInOut"
+config.cursor_blink_ease_out = "EaseInOut"
 
 --------------------------------------------------------------------------------
 -- 7. KEYBINDINGS
@@ -247,6 +368,71 @@ config.leader = { key = "a", mods = "CTRL", timeout_milliseconds = 1000 }
 -- On macOS: CMD is standard for window/tab operations
 -- On Linux / Windows: CTRL+SHIFT or ALT is standard
 local mod = is_mac and "CMD" or "CTRL|SHIFT"
+
+--------------------------------------------------------------------------------
+-- Interactive Hotkeys Cheatsheet Popup (InputSelector)
+--------------------------------------------------------------------------------
+local cheatsheet_action = act.InputSelector({
+  title = "󰌌  Keybindings Cheatsheet (Type to search, Enter to execute, Esc to exit)",
+  choices = {
+    { label = "─── PANES (Leader: Ctrl+A) ──────────────────────────────────" },
+    { id = "split_h", label = "Leader + | (or \\)   Split pane horizontally (left / right)" },
+    { id = "split_v", label = "Leader + -          Split pane vertically (top / bottom)" },
+    { id = "nav_pane", label = "Leader + h/j/k/l    Navigate panes (Vim keys / Arrows)" },
+    { id = "resize", label = "Leader + H/J/K/L    Resize active pane (by 5 cells)" },
+    { id = "zoom", label = "Leader + z          Toggle pane zoom (fullscreen pane)" },
+    { id = "close_pane", label = "Leader + x          Close active pane" },
+    { label = "─── TABS ──────────────────────────────────────────────────" },
+    { id = "new_tab", label = "Ctrl+Shift+T / Cmd+T / Leader+c   New tab" },
+    { id = "close_tab", label = "Ctrl+Shift+W / Cmd+W             Close tab" },
+    { id = "next_tab", label = "Leader + n                       Next tab" },
+    { id = "prev_tab", label = "Leader + p                       Previous tab" },
+    { id = "tab_num", label = "Alt+1..9 / Cmd+1..9               Switch to tab 1-9" },
+    { label = "─── CLIPBOARD & SCROLLBACK ────────────────────────────────" },
+    { id = "copy", label = "Ctrl+Shift+C / Cmd+C          Copy to clipboard" },
+    { id = "paste", label = "Ctrl+Shift+V / Cmd+V          Paste from clipboard" },
+    { id = "copy_mode", label = "Leader + [                   Enter Vim copy mode (scrollback)" },
+    { id = "search", label = "Leader + /                   Search scrollback buffer" },
+    { label = "─── LAUNCHER & UTILITIES ─────────────────────────────────" },
+    { id = "cheatsheet", label = "Leader + ? / F1             Open this Hotkeys Cheatsheet" },
+    { id = "launcher", label = "Leader + Space               Launcher menu (Switch shells/WSL)" },
+    { id = "palette", label = "Ctrl+Shift+P / Cmd+P          Command Palette" },
+    { id = "fullscreen", label = "Alt + Enter                  Toggle Fullscreen" },
+    { id = "font_inc", label = "Ctrl/Cmd + Plus              Increase font size" },
+    { id = "font_dec", label = "Ctrl/Cmd + Minus             Decrease font size" },
+    { id = "font_reset", label = "Ctrl/Cmd + 0                 Reset font size" },
+  },
+  action = wezterm.action_callback(function(window, pane, id, label)
+    if not id then return end
+    if id == "split_h" then
+      window:perform_action(act.SplitHorizontal({ domain = "CurrentPaneDomain" }), pane)
+    elseif id == "split_v" then
+      window:perform_action(act.SplitVertical({ domain = "CurrentPaneDomain" }), pane)
+    elseif id == "zoom" then
+      window:perform_action(act.TogglePaneZoomState, pane)
+    elseif id == "close_pane" then
+      window:perform_action(act.CloseCurrentPane({ confirm = true }), pane)
+    elseif id == "new_tab" then
+      window:perform_action(act.SpawnTab("CurrentPaneDomain"), pane)
+    elseif id == "close_tab" then
+      window:perform_action(act.CloseCurrentTab({ confirm = false }), pane)
+    elseif id == "next_tab" then
+      window:perform_action(act.ActivateTabRelative(1), pane)
+    elseif id == "prev_tab" then
+      window:perform_action(act.ActivateTabRelative(-1), pane)
+    elseif id == "copy_mode" then
+      window:perform_action(act.ActivateCopyMode, pane)
+    elseif id == "search" then
+      window:perform_action(act.Search("CurrentSelectionOrEmptyString"), pane)
+    elseif id == "launcher" then
+      window:perform_action(act.ShowLauncher, pane)
+    elseif id == "palette" then
+      window:perform_action(act.ActivateCommandPalette, pane)
+    elseif id == "fullscreen" then
+      window:perform_action(act.ToggleFullScreen, pane)
+    end
+  end),
+})
 
 config.keys = {
   -- Leader passthrough (press Ctrl+A twice to send Ctrl+A to the shell/editor)
@@ -316,8 +502,14 @@ config.keys = {
   { key = "/", mods = "LEADER", action = act.Search("CurrentSelectionOrEmptyString") },
 
   ------------------------------------------------------------------------------
-  -- Launcher, Command Palette & Windows
+  -- Launcher, Command Palette, Cheatsheet & Windows
   ------------------------------------------------------------------------------
+  -- Hotkeys Cheatsheet Popup (Interactive fuzzy search modal)
+  { key = "?", mods = "LEADER|SHIFT", action = cheatsheet_action },
+  { key = "/", mods = "LEADER|SHIFT", action = cheatsheet_action },
+  { key = "F1", mods = "NONE", action = cheatsheet_action },
+  { key = "?", mods = mod, action = cheatsheet_action },
+
   -- Launch menu (select shell, WSL distro, etc.)
   { key = "Space", mods = "LEADER", action = act.ShowLauncher },
   { key = "p", mods = mod, action = act.ActivateCommandPalette },
