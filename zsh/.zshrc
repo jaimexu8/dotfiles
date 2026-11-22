@@ -116,6 +116,60 @@ alias mxinu="mount-xinu"
 alias uxinu="unmount-xinu"
 
 # ==========================================
+# MOTH REMOTE MOUNTING (SSHFS)
+# ==========================================
+
+mount-moth() {
+    local remote_path="${1:-}"
+    local mount_dir="$HOME/moth"
+    mkdir -p "$mount_dir"
+    
+    # Check if already mounted
+    if mount | grep -q "$mount_dir"; then
+        echo "moth: $mount_dir is already mounted."
+        return 0
+    fi
+    
+    echo "Mounting moth home directory to $mount_dir..."
+    sshfs "moth:${remote_path}" "$mount_dir" -o reconnect,ServerAliveInterval=15,ServerAliveCountMax=3,defer_permissions,noappledouble,volname=moth
+    
+    if [ $? -eq 0 ]; then
+        echo "moth: Successfully mounted to $mount_dir"
+    else
+        echo "moth: Failed to mount moth"
+        return 1
+    fi
+}
+
+unmount-moth() {
+    local mount_dir="$HOME/moth"
+    
+    if ! mount | grep -q "$mount_dir"; then
+        echo "moth: $mount_dir is not mounted."
+        return 0
+    fi
+    
+    echo "Unmounting $mount_dir..."
+    
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        umount "$mount_dir" 2>/dev/null || diskutil unmount "$mount_dir"
+    else
+        fusermount -u "$mount_dir" 2>/dev/null || umount "$mount_dir"
+    fi
+    
+    if [ $? -eq 0 ]; then
+        echo "moth: Successfully unmounted."
+    else
+        echo "moth: Failed to unmount $mount_dir"
+        return 1
+    fi
+}
+
+# Short aliases
+alias mmoth="mount-moth"
+alias umoth="unmount-moth"
+
+# ==========================================
 # COMMAND HISTORY
 # ==========================================
 HISTFILE="$HOME/.zsh_history"
