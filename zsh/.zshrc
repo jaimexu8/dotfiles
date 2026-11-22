@@ -56,6 +56,29 @@ yank() {
 }
 
 # ==========================================
+# SSHFS HELPERS
+# ==========================================
+
+# True if $1 is an active mountpoint (exact path; not a substring match).
+_sshfs_is_mounted() {
+    local mount_dir="$1"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        mount | grep -q " on ${mount_dir} "
+    else
+        mountpoint -q "$mount_dir"
+    fi
+}
+
+_sshfs_unmount() {
+    local mount_dir="$1"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        umount "$mount_dir" 2>/dev/null || diskutil unmount "$mount_dir"
+    else
+        fusermount -u "$mount_dir" 2>/dev/null || umount "$mount_dir"
+    fi
+}
+
+# ==========================================
 # XINU REMOTE MOUNTING (SSHFS)
 # ==========================================
 
@@ -70,16 +93,15 @@ mount-xinu() {
     local mount_dir="$HOME/xinu_remote"
     mkdir -p "$mount_dir"
     
-    # Check if already mounted
-    if mount | grep -q "$mount_dir"; then
+    if _sshfs_is_mounted "$mount_dir"; then
         echo "xinu: $mount_dir is already mounted."
         return 0
     fi
     
-    echo "Mounting Purdue home directory from $host to $mount_dir..."
-    sshfs "${host}:" "$mount_dir" -o reconnect,ServerAliveInterval=15,ServerAliveCountMax=3
+    local opts="reconnect,ServerAliveInterval=15,ServerAliveCountMax=3"
     
-    if [ $? -eq 0 ]; then
+    echo "Mounting Purdue home directory from $host to $mount_dir..."
+    if sshfs "${host}:" "$mount_dir" -o "$opts"; then
         echo "xinu: Successfully mounted to $mount_dir"
     else
         echo "xinu: Failed to mount $host"
@@ -90,20 +112,14 @@ mount-xinu() {
 unmount-xinu() {
     local mount_dir="$HOME/xinu_remote"
     
-    if ! mount | grep -q "$mount_dir"; then
+    if ! _sshfs_is_mounted "$mount_dir"; then
         echo "xinu: $mount_dir is not mounted."
         return 0
     fi
     
     echo "Unmounting $mount_dir..."
     
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        umount "$mount_dir" 2>/dev/null || diskutil unmount "$mount_dir"
-    else
-        fusermount -u "$mount_dir" 2>/dev/null || umount "$mount_dir"
-    fi
-    
-    if [ $? -eq 0 ]; then
+    if _sshfs_unmount "$mount_dir"; then
         echo "xinu: Successfully unmounted."
     else
         echo "xinu: Failed to unmount $mount_dir"
@@ -124,16 +140,18 @@ mount-moth() {
     local mount_dir="$HOME/moth"
     mkdir -p "$mount_dir"
     
-    # Check if already mounted
-    if mount | grep -q "$mount_dir"; then
+    if _sshfs_is_mounted "$mount_dir"; then
         echo "moth: $mount_dir is already mounted."
         return 0
     fi
     
-    echo "Mounting moth home directory to $mount_dir..."
-    sshfs "moth:${remote_path}" "$mount_dir" -o reconnect,ServerAliveInterval=15,ServerAliveCountMax=3,defer_permissions,noappledouble,volname=moth
+    local opts="reconnect,ServerAliveInterval=15,ServerAliveCountMax=3"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        opts+=",defer_permissions,noappledouble,volname=moth"
+    fi
     
-    if [ $? -eq 0 ]; then
+    echo "Mounting moth home directory to $mount_dir..."
+    if sshfs "moth:${remote_path}" "$mount_dir" -o "$opts"; then
         echo "moth: Successfully mounted to $mount_dir"
     else
         echo "moth: Failed to mount moth"
@@ -144,20 +162,14 @@ mount-moth() {
 unmount-moth() {
     local mount_dir="$HOME/moth"
     
-    if ! mount | grep -q "$mount_dir"; then
+    if ! _sshfs_is_mounted "$mount_dir"; then
         echo "moth: $mount_dir is not mounted."
         return 0
     fi
     
     echo "Unmounting $mount_dir..."
     
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        umount "$mount_dir" 2>/dev/null || diskutil unmount "$mount_dir"
-    else
-        fusermount -u "$mount_dir" 2>/dev/null || umount "$mount_dir"
-    fi
-    
-    if [ $? -eq 0 ]; then
+    if _sshfs_unmount "$mount_dir"; then
         echo "moth: Successfully unmounted."
     else
         echo "moth: Failed to unmount $mount_dir"
