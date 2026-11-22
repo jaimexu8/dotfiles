@@ -52,3 +52,5 @@
 	helper = 
 	helper = !gh auth git-credential
 
+[safe]
+	directory = /home/jaime/xinu_remote/cs354/lab9

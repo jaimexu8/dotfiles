@@ -56,6 +56,66 @@ yank() {
 }
 
 # ==========================================
+# XINU REMOTE MOUNTING (SSHFS)
+# ==========================================
+
+mount-xinu() {
+    local host="${1:-x05}"
+    
+    # Automatically formats input numbers (e.g., '1' or '01' becomes 'x01')
+    if [[ "$host" =~ ^[0-9]+$ ]]; then
+        host=$(printf "x%02d" "$host")
+    fi
+    
+    local mount_dir="$HOME/xinu_remote"
+    mkdir -p "$mount_dir"
+    
+    # Check if already mounted
+    if mount | grep -q "$mount_dir"; then
+        echo "xinu: $mount_dir is already mounted."
+        return 0
+    fi
+    
+    echo "Mounting Purdue home directory from $host to $mount_dir..."
+    sshfs "${host}:" "$mount_dir" -o reconnect,ServerAliveInterval=15,ServerAliveCountMax=3
+    
+    if [ $? -eq 0 ]; then
+        echo "xinu: Successfully mounted to $mount_dir"
+    else
+        echo "xinu: Failed to mount $host"
+        return 1
+    fi
+}
+
+unmount-xinu() {
+    local mount_dir="$HOME/xinu_remote"
+    
+    if ! mount | grep -q "$mount_dir"; then
+        echo "xinu: $mount_dir is not mounted."
+        return 0
+    fi
+    
+    echo "Unmounting $mount_dir..."
+    
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        umount "$mount_dir" 2>/dev/null || diskutil unmount "$mount_dir"
+    else
+        fusermount -u "$mount_dir" 2>/dev/null || umount "$mount_dir"
+    fi
+    
+    if [ $? -eq 0 ]; then
+        echo "xinu: Successfully unmounted."
+    else
+        echo "xinu: Failed to unmount $mount_dir"
+        return 1
+    fi
+}
+
+# Short aliases
+alias mxinu="mount-xinu"
+alias uxinu="unmount-xinu"
+
+# ==========================================
 # COMMAND HISTORY
 # ==========================================
 HISTFILE="$HOME/.zsh_history"
@@ -82,3 +142,6 @@ zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 # ==========================================
 export PATH="$HOME/.local/bin:$PATH"
 
+
+# opencode
+export PATH=/home/jaime/.opencode/bin:$PATH
