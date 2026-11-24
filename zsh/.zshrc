@@ -8,10 +8,11 @@ fi
 # ==========================================
 # PROMPT CONFIGURATION
 # ==========================================
-# %m = machine name
-# %~ = current working directory
-# %# = % symbol for regular users
-PROMPT='%m %~ %# '
+if [[ -n "$SSH_CONNECTION" || -n "$SSH_TTY" ]]; then
+    PROMPT='%n@%m %~ %# '
+else
+    PROMPT='%~ %# '
+fi
 
 # ==========================================
 # ALIASES
@@ -33,10 +34,6 @@ fi
 # ==========================================
 # FUNCTIONS
 # ==========================================
-xu1545() {
-    ssh xu1545@${1:-data}.cs.purdue.edu
-}
-
 yank() {
     local file="$1"
 
@@ -208,6 +205,3 @@ zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 # ==========================================
 export PATH="$HOME/.local/bin:$PATH"
 
-
-# opencode
-export PATH=/home/jaime/.opencode/bin:$PATH
