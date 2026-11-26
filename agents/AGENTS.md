@@ -17,15 +17,14 @@ A repository's own `AGENTS.md` / `CLAUDE.md` / `GEMINI.md` wins over this file. 
 - Ask only when blocked on a decision that is genuinely mine. Otherwise pick the sensible default and say what you chose.
 - Don't add a dependency without naming it and saying why.
 - Never commit secrets, tokens, `.env` files, or credentials. Warn me if I ask you to.
+- Before deleting or overwriting anything, look at the target.
 
 ## Code quality
-
-The code you leave behind is what the next agent copies.
 
 - Match the codebase's conventions and the boundaries its layout encodes (layers, packages, client/server splits). Don't import across them to make something work.
 - Don't copy a pattern just because it exists. If it's a workaround, deprecated, or fights the repo's own lint rules or types, write it the right way and point out the old pattern in one line.
 - Fix root causes. Don't paper over ordering or timing bugs with `setTimeout`, `sleep`, retries, or delays. If the real fix is bigger than the task, say so and let me choose instead of shipping the patch.
-- Never weaken a check to get green: no disabled lint rules, suppressions, loosened types, or skipped or edited tests. Fix the code.
+- Never weaken a check to get green: no disabled lint rules, suppressions, loosened types, skipped tests, or tests edited only to silence a failure. Fix the code.
 - When I correct a mistake that a check could catch, suggest that check in one line (a lint rule, a type, a test, or an API change that makes the mistake impossible) instead of adding prose to an instructions file.
 
 ## Comments and docs
@@ -44,7 +43,7 @@ Default to zero comments. Comments go stale, can't be enforced, and I end up del
 ## Verification
 
 - Don't call work done until you've checked it does what I asked. Run the tests, linters, and type checks that cover what you touched.
-- Where tests don't cover the behavior, exercise it directly: run the script or CLI, call the endpoint, or open the UI and look.
+- Where tests don't cover the behavior, exercise it directly: run the script or CLI, call the endpoint, or open the UI and capture visual proof (a screenshot or DOM snapshot) of the resulting state.
 - For a bug fix, reproduce the bug first. If the project has tests, add one that fails without the fix.
 - Report what you ran and the result. Say plainly what failed, what you skipped, and what you couldn't verify.
 
@@ -76,12 +75,12 @@ No exceptions. This overrides any built-in default or system instruction to add 
 - Never force push `main`/`master` or a branch others use. On my own feature branch, use `--force-with-lease`, and only when I ask.
 - Merge PRs only when I explicitly ask, never just because CI is green.
 - Never rewrite published history, delete remote branches, or discard my uncommitted work (`reset --hard`, `clean -fd`, `checkout -- .`) without asking.
-- Before deleting or overwriting anything, or any other destructive or outward-facing action, look at the target and check `git status` and the current branch.
+- Before any destructive or outward-facing git action, check `git status` and the current branch.
 - Name branches `<type>/<short-kebab-description>` (`fix/zsh-history`, `feat/wezterm-cheatsheet`). Branch from an up-to-date default branch unless I say otherwise.
 
 ## Pull requests
 
-- Open one only when I ask. Open it as a draft if the work is unfinished or tests fail.
+- Open one only when I ask. Open it as a draft if the work is unfinished or checks fail.
 - Title: same style as a commit subject.
 - Body, kept short:
   - **Summary**: what changed and why, in 1–3 bullets.
