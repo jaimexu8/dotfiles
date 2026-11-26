@@ -5,9 +5,9 @@ A repository's own `AGENTS.md`, `CLAUDE.md`, or `GEMINI.md` overrides this file.
 
 - The codebase is what the next agent copies: follow its good patterns, not its workarounds. If a pattern is a hack, deprecated, or fights the repo's lint rules or types, write it the right way. Name the old pattern in one line and offer to clean up existing copies; do that cleanup only if it's in scope or I agree.
 - Respect the boundaries the layout encodes: layers, packages, client/server or main/renderer splits, file-name markers. Never import across them.
-- Fix root causes. No `setTimeout`, `sleep`, retries, or delays to paper over ordering or timing bugs. If the real fix is bigger than the task, say so and let me choose. Never ship a patch with a comment justifying it.
+- Fix root causes. Don't paper over ordering or timing bugs with `setTimeout`, `sleep`, retries, or delays. If the real fix is bigger than the task, say so and let me choose. Never ship a patch with a comment justifying it.
 - Never weaken a check to get green: no disabled lint rules, suppressions, loosened types, skipped tests, `--no-verify` or skipped hooks, or tests edited only to silence a failure. Read the diagnostic and fix the code.
-- On every correction I make, propose in one line the check (lint rule, type, test) or API change that would make the mistake impossible. Don't add prose to an instructions file instead.
+- When I correct a mistake that a check or API could prevent, propose in one line the check (lint rule, type, test) or API change that would make the mistake impossible. Don't add prose to an instructions file instead.
 
 ## Comments and Markdown
 
@@ -21,9 +21,9 @@ A repository's own `AGENTS.md`, `CLAUDE.md`, or `GEMINI.md` overrides this file.
 ## Verification
 
 - It's not done until you've checked it does what I meant. Run the tests, linters, and type checks covering what you touched.
-- Exercise the behavior: run the script or CLI, call the endpoint, or drive the UI and capture a screenshot or DOM snapshot. Use the repo's own feature map, driver scripts, or verification tooling if it has them.
+- When the change affects behavior, exercise it: run the script or CLI, call the endpoint, or drive the UI and capture a screenshot or DOM snapshot. Use the repo's own feature map, driver scripts, or verification tooling if it has them.
 - If the project already uses stronger checks (property tests, model or formal checks) that cover the change, run or extend them.
-- For a bug fix, reproduce it first. If the project has tests, add one that fails without the fix.
+- For a bug fix, reproduce it first. If the project has an existing test suite, add a test that fails without the fix.
 - Report what you ran, the results, and the evidence. For behavior changes, describe what the user now sees. Say plainly what failed, what you skipped, and what you couldn't verify.
 
 ## Working with me
@@ -40,7 +40,7 @@ A repository's own `AGENTS.md`, `CLAUDE.md`, or `GEMINI.md` overrides this file.
 - In repos others use, never push to `main`/`master`: branch first as `<type>/<short-kebab-description>`. In repos only I use, pushing to `main` is fine when I ask.
 - Never force push `main`/`master` or a shared branch. On my own branch, use `--force-with-lease`, and only when I ask.
 - Never rewrite published history, delete remote branches, or discard uncommitted work (`reset --hard`, `clean -fd`, `checkout -- .`) without asking.
-- No AI attribution: no `Co-Authored-By` or other trailer naming an AI or tool, and no "Generated with" lines, robot emojis, or tool links in commits, PRs, comments, or code. Use my configured git identity, never change `user.name` / `user.email`, and strip any attribution a tool adds.
+- No AI attribution: no `Co-Authored-By` or other trailer naming an AI or agent tool, and no AI "Generated with" lines, robot emojis, or AI-tool links in commits, PRs, or review comments. Never add any of that in code. Use my configured git identity, never change `user.name` / `user.email`, and strip any AI attribution a tool adds before committing or posting.
 
 ## Commits and PRs
 
