@@ -2,6 +2,7 @@
 
 ## Structure
 
+- agents/ - Global instructions shared by all coding agents (Claude Code, Antigravity, Codex, Omnigent)
 - caelestia/ - Caelestia shell config
 - git/ - Global Git config & ignore files
 - nvim/ - Neovim (init.lua + lazy-lock.json)
@@ -105,3 +106,48 @@ bash -c "$(curl -sL https://raw.githubusercontent.com/jaimexu8/dotfiles/main/ins
 bash -c "$(curl -sL https://raw.githubusercontent.com/jaimexu8/dotfiles/main/install-dnf.sh)"
 ```
 
+
+## Agent Instructions
+
+`agents/AGENTS.md` is the single source of global instructions for every coding agent: language and tone, commit messages, branches, PRs, and commit/push/merge rules. `agents/link.sh` (or `link.ps1` on Windows) symlinks it into each CLI's global path:
+
+| CLI | Linked path |
+| :--- | :--- |
+| Claude Code | `~/.claude/CLAUDE.md` (or `$CLAUDE_CONFIG_DIR/CLAUDE.md`) |
+| Antigravity (`agy`) | `~/.gemini/AGENTS.md` |
+| Codex | `~/.codex/AGENTS.md` (or `$CODEX_HOME/AGENTS.md`) |
+| Omnigent | Nothing extra: it launches the CLIs above, which load their own file |
+
+They also turn off Claude Code's built-in commit/PR attribution in `~/.claude/settings.json`, since `AGENTS.md` forbids AI co-author lines and "Generated with" notes. The scripts are safe to re-run. Any existing file you wrote yourself is backed up as `<file>.bak.<timestamp>` before it is replaced.
+
+### Setup
+
+**Ubuntu / Amazon Linux:** the install scripts above already run `agents/link.sh`.
+
+**macOS, WSL, or a remote server (instructions only, no full install):**
+
+```bash
+git clone https://github.com/jaimexu8/dotfiles.git ~/dotfiles   # skip if already cloned
+~/dotfiles/agents/link.sh
+```
+
+**Windows (PowerShell):** turn on Developer Mode first (Settings > System > For developers) so symlinks work without admin rights.
+
+```powershell
+git clone https://github.com/jaimexu8/dotfiles.git $HOME\dotfiles
+powershell -ExecutionPolicy Bypass -File $HOME\dotfiles\agents\link.ps1
+```
+
+Without Developer Mode, the script falls back to copying the file. In that case, re-run it after every pull.
+
+WSL and Windows have separate home directories. Run `link.sh` inside WSL and `link.ps1` on Windows to cover both.
+
+### Syncing
+
+Edit `~/dotfiles/agents/AGENTS.md`, then commit and push. On every other machine:
+
+```bash
+git -C ~/dotfiles pull
+```
+
+The symlinks make the change live right away, and new agent sessions pick it up. Only re-run `link.sh` / `link.ps1` when you add a new machine, a new CLI, or (on Windows) you are using the copy fallback.

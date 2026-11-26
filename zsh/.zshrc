@@ -200,4 +200,5 @@ zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 # ENVIRONMENT PATHS
 # ==========================================
 export PATH="$HOME/.local/bin:$PATH"
+export ANI_CLI_DOWNLOAD_DIR="$HOME/Movies/Anime"
 

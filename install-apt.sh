@@ -40,6 +40,8 @@ mkdir -p ~/.config
 stow --adopt git nvim vim zsh
 git restore .
 
+./agents/link.sh
+
 $SUDO chsh -s $(which zsh) $(whoami)
 exec zsh
 
