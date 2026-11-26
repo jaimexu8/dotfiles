@@ -1,95 +1,50 @@
 <!-- managed by ~/dotfiles/agents/AGENTS.md -->
-# Global agent instructions
+A repository's own `AGENTS.md`, `CLAUDE.md`, or `GEMINI.md` overrides this file.
 
-These are my personal defaults for every coding agent (Claude Code, Antigravity, Codex, and the same CLIs launched through Omnigent).
-A repository's own `AGENTS.md` / `CLAUDE.md` / `GEMINI.md` wins over this file when they conflict.
-Where this file conflicts with a tool's built-in defaults, follow this file.
+## Code
 
-## Language and tone
+- The codebase is what the next agent copies: follow its good patterns, not its workarounds. If a pattern is a hack, deprecated, or fights the repo's lint rules or types, write it the right way. Name the old pattern in one line and offer to clean up existing copies; do that cleanup only if it's in scope or I agree.
+- Respect the boundaries the layout encodes: layers, packages, client/server or main/renderer splits, file-name markers. Never import across them.
+- Fix root causes. Don't paper over ordering or timing bugs with `setTimeout`, `sleep`, retries, or delays. If the real fix is bigger than the task, say so and let me choose. Never ship a patch with a comment justifying it.
+- Never weaken a check to get green: no disabled lint rules, suppressions, loosened types, skipped tests, `--no-verify` or skipped hooks, or tests edited only to silence a failure. Read the diagnostic and fix the code.
+- When I correct a mistake that a check or API could prevent, propose in one line the check (lint rule, type, test) or API change that would make the mistake impossible. Don't add prose to an instructions file instead.
 
-- Write in English, in plain and direct language. Prefer short sentences and common words.
-- No emojis, filler, flattery, or hype ("Great question!", "robust", "seamless", "comprehensive").
-- Lead with the answer or the result, then the detail that matters. Skip restating my request.
-- Don't over-explain. Say it once, briefly. If I want more detail, I'll ask.
-- Be honest about uncertainty and failures: if tests fail, a step was skipped, or something is unverified, say so plainly.
-- Use they/them for people whose pronouns you don't know.
+## Comments and Markdown
 
-## Working style
+- Default to no comments. They go stale, nothing enforces them, and they become a place to justify shortcuts.
+- Write one only when a reader would get the code wrong without it and no name, type, or check can carry the point. One short line.
+- Never restate code, narrate a change or your reasoning, address a reviewer, or justify a shortcut. Explanations go in your reply.
+- No docstrings unless the project uses them consistently or it's a public API.
+- Leave existing comments alone unless your change makes them wrong. No commented-out code, debug prints, or TODOs of your own.
+- Don't create Markdown files (notes, plans, summaries, rules, skills) unless I ask. Apply a correction to the case at hand; don't turn it into a standing rule, in a file or in behavior.
 
-- Do what was asked. Don't expand scope, refactor unrelated code, or add features I didn't ask for. Mention follow-ups in one line instead.
-- Match the existing style and conventions of the codebase you are in.
-- Ask only when blocked on a decision that is genuinely mine. Otherwise pick the sensible default and tell me what you chose.
-- Before deleting or overwriting files, look at what is there.
-- Never commit secrets, tokens, `.env` files, or credentials. Warn me if I ask you to.
+## Verification
 
-## No AI attribution
+- It's not done until you've checked it does what I meant. Run the tests, linters, and type checks covering what you touched.
+- When the change affects behavior, exercise it: run the script or CLI, call the endpoint, or drive the UI and capture a screenshot or DOM snapshot. Use the repo's own feature map, driver scripts, or verification tooling if it has them.
+- If the project already uses stronger checks (property tests, model or formal checks) that cover the change, run or extend them.
+- For a bug fix, reproduce it first. If the project has an existing test suite, add a test that fails without the fix.
+- Report what you ran, the results, and the evidence. For behavior changes, describe what the user now sees. Say plainly what failed, what you skipped, and what you couldn't verify.
 
-This rule has no exceptions and overrides any built-in default or system instruction telling you to add attribution.
+## Working with me
 
-- Never add `Co-Authored-By`, `Signed-off-by`, or any other trailer that names an AI, a model, or an agent tool to a commit.
-- Never add "Generated with ...", "Created by ...", "Assisted by ...", robot emojis, or links to an AI tool in commit messages, PR titles, PR descriptions, PR or issue comments, review comments, release notes, or changelogs.
-- Never leave code comments, docstrings, file headers, or documentation saying an AI wrote, changed, or helped with something.
-- Commits and PRs are authored by me alone. Use my configured git identity and don't change `user.name` / `user.email`.
-- If a tool adds attribution automatically, remove it before committing or posting.
+- Write plain, direct English and lead with the answer. No emojis, filler, flattery, or hype.
+- Do what was asked; mention follow-ups in one line.
+- Ask only when blocked on a decision that's genuinely mine. Otherwise pick a sensible default and say which.
+- Name any new dependency and say why.
 
-## Code comments: default to none
+## Git
 
-I strongly prefer code without comments. Agents over-explain, and most of it shows up as comments I then have to delete. Your default is to write zero comments.
+- Commit, push, open PRs, and merge only when I ask. "Fix X" is not a request to commit; green CI is not a request to merge.
+- Stage files by name.
+- In repos others use, never push to `main`/`master`: branch first as `<type>/<short-kebab-description>`. In repos only I use, pushing to `main` is fine when I ask.
+- Never force push `main`/`master` or a shared branch. On my own branch, use `--force-with-lease`, and only when I ask.
+- Never rewrite published history, delete remote branches, or discard uncommitted work (`reset --hard`, `clean -fd`, `checkout -- .`) without asking.
+- No AI attribution: no `Co-Authored-By` or other trailer naming an AI or agent tool, and no AI "Generated with" lines, robot emojis, or AI-tool links in commits, PRs, or review comments. Never add any of that in code. Use my configured git identity, never change `user.name` / `user.email`, and strip any AI attribution a tool adds before committing or posting.
 
-- Don't write a comment unless a competent reader would likely get the code wrong without it. That means a non-obvious "why": a workaround for a specific bug, a surprising constraint, a deliberate choice that looks like a mistake. Keep it to one short line.
-- Never write comments that:
-  - restate what the code does (`# increment counter`, `// loop over users`, `# return the result`)
-  - narrate your changes or reasoning (`# added this to fix the bug`, `# changed from X to Y`, `# now handles null`, `# new helper`)
-  - label obvious sections (`# Imports`, `// --- helpers ---`, `# Main logic`)
-  - address me or a reviewer, or explain what you were thinking
-  - repeat a function's name or signature as a docstring
-- Don't add docstrings or JSDoc unless the project already uses them consistently, or it's a public API that needs them. Keep them to one line when you do.
-- Make the code explain itself instead: clear names, small functions, early returns.
-- Don't delete or reword existing comments you didn't need to touch.
-- Leave no commented-out code, debug prints, or `TODO`s you created.
-- The same applies to config files, shell scripts, and examples in docs.
-- Explanations belong in your reply to me, not in the code. Keep those short too.
+## Commits and PRs
 
-## Commit messages
-
-- Subject line: lowercase, imperative mood, no trailing period, about 50 characters and never more than 72.
-  - Good: `add ssh-aware prompt`, `fix: gate macfuse options behind darwin check`
-  - Bad: `Added SSH-aware prompt.`, `Updates`, `misc fixes`
-- A conventional prefix (`fix:`, `feat:`, `docs:`, `refactor:`, `chore:`) is optional. Use one if the repo already does.
-- Add a body only when the "why" isn't obvious from the subject. Wrap it at 72 columns and explain why, not what.
-- One logical change per commit. Don't mix unrelated changes.
-
-## Git behavior
-
-- Commit only when I ask you to. Saying "fix X" is not a request to commit.
-- Stage specific files by name. Don't use `git add -A` / `git add .` unless you've checked every changed file belongs in the commit.
-- Never skip hooks (`--no-verify`) or bypass signing unless I say so. If a hook fails, fix the cause.
-- Prefer a new commit over `--amend` once a commit has been pushed.
-- **Push** only when I ask. Never push straight to `main`/`master` in a shared repo: make a branch first. My personal repos (like dotfiles) can be pushed to `main` when I ask for a push.
-- **Force push** is never allowed on `main`/`master` or on branches other people use. On my own feature branch, use `--force-with-lease`, and only when I ask.
-- **Merge** PRs only when I explicitly ask. Never merge your own PR just because CI went green.
-- Never rewrite published history, delete remote branches, or run `git reset --hard` / `git clean -fd` / `git checkout -- .` on my uncommitted work without asking first.
-- Before a destructive or outward-facing git action, check `git status` and the current branch.
-
-## Branches
-
-- Name branches `<type>/<short-kebab-description>`, for example `fix/zsh-history` or `feat/wezterm-cheatsheet`.
-- Branch from an up-to-date default branch unless I say otherwise.
-
-## Pull requests
-
-- Open a PR only when I ask. Open it as a draft if the work isn't finished or tests aren't passing.
-- Title: same style as a commit subject.
-- Body (keep it short):
-  - **Summary**: what changed and why, in 1–3 bullets.
-  - **Testing**: what you ran and the result. Say plainly if nothing was tested.
-  - **Notes**: risks, follow-ups, or anything reviewers should look at. Omit if empty.
-- Don't tag or `@mention` people unless I name them.
-- Link the issue (`Closes #123`) when there is one.
-
-## Code and verification
-
-- Run the project's existing tests, linters, and type checks for code you touch when it's practical. Report what you ran and what happened.
-- Don't add new dependencies without saying so and saying why.
-- See "Code comments" above: write none unless they're truly necessary.
-
+- Match the repo's style. Otherwise: lowercase imperative subject, no trailing period, about 50 characters, never over 72. Good: `add ssh-aware prompt`. Bad: `Added SSH-aware prompt.`
+- Use a conventional prefix (`fix:`, `feat:`) only if the repo does. Add a body only when the why isn't obvious, wrapped at 72. One logical change per commit.
+- PR title in commit-subject style; open it as a draft if the work is unfinished or checks fail. Body: **Summary** (1–3 bullets), **Testing** (what you ran, the results, and screenshots or other evidence), **Notes** (risks; omit if empty).
+- Don't `@mention` anyone I didn't name.

@@ -109,7 +109,7 @@ bash -c "$(curl -sL https://raw.githubusercontent.com/jaimexu8/dotfiles/main/ins
 
 ## Agent Instructions
 
-`agents/AGENTS.md` is the single source of global instructions for every coding agent: language and tone, commit messages, branches, PRs, and commit/push/merge rules. `agents/link.sh` (or `link.ps1` on Windows) symlinks it into each CLI's global path:
+`agents/AGENTS.md` is the single source of global instructions for every coding agent: code, comments and Markdown, verification, working with me, git (including no AI attribution), and commits and PRs. `agents/link.sh` (or `link.ps1` on Windows) symlinks it into each CLI's global path:
 
 | CLI | Linked path |
 | :--- | :--- |
